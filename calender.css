@@ -51,6 +51,7 @@
 .date table td.today {
   color: yellow;
 }
+.date table .invalid,
 .date table .inactive {
   color: #555;
 }

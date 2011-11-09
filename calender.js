@@ -48,15 +48,16 @@
     return months.indexOf(name) + 1
   }
 
-
   function Calendar (el, options) {
     var self = this
       , optionAttr = null
     this.options = {
         format: ['year', 'month', 'day']
       , date: false
+      , startDate: false
+      , endDate: false
     }
-    for(optionAttr in options){
+    for (optionAttr in options) {
       this.options[optionAttr] = options[optionAttr]
     }
     this.$input = $(el).first()
@@ -77,7 +78,7 @@
     this.$calendar.delegate('tbody td', 'mouseout', function () {
       $(this).closest('tbody').find('td:nth-child(' + (this.cellIndex + 1) + ')').removeClass('hover')
     })
-    this.$calendar.delegate('tbody td:not(.inactive)', 'click.day', function (e) {
+    this.$calendar.delegate('tbody td:not(.inactive):not(.invalid)', 'click.day', function (e) {
       var day = $(this).html()
         , newDate = {
               'year': self.$calendar.find('.date-current-year').html()
@@ -86,8 +87,8 @@
           }
         , newVal = []
         , i = 0
-      for(; i < 3; i++){
-        newVal.push(newDate[self.options.format[i]]);
+      for (; i < 3; i++) {
+        newVal.push(newDate[self.options.format[i]])
       }
       self.$input.val(newVal.join('-'))
       self.$calendar.removeClass('active')
@@ -112,7 +113,8 @@
 
   Calendar.prototype.setDate = function (date) {
     var d = new Date(date)
-      , monthStart = (new Date(d.getFullYear(), d.getMonth(), 1).getDay())
+      , monthStartDate = new Date(d.getFullYear(), d.getMonth(), 1)
+      , monthStart = (monthStartDate.getDay())
       , daysInPreviousMonth = getDaysInMonth(
             d.getMonth() ? d.getFullYear() : d.getFullYear() - 1
           , d.getMonth() ? d.getMonth() - 1 : d.getMonth()
@@ -124,6 +126,26 @@
       , daysInMonth = getDaysInMonth(d.getYear(), d.getMonth())
       , remainingWeeks = Math.floor((daysInMonth + monthStart - 7) / 7)
       , i = 0
+      , monthEndDate = new Date(d.getFullYear(), d.getMonth(), daysInMonth)
+      , inValidMonth = (this.options.startDate > monthStartDate && this.options.startDate < monthEndDate)
+                       || (this.options.endDate > monthEndDate && this.options.endDate < monthEndDate)
+      , validDays = {}
+      , validStartDate = this.options.startDate > monthStartDate ? this.options.startDate.getDate() : 1
+      , validEndDate = this.options.endDate > monthEndDate ? this.options.endDate.getDate() : daysInMonth
+      , validClass = ''
+
+    if (this.options.startDate && this.options.endDate && inValidMonth ) {
+      while (validStartDate < daysInMonth) {
+        if (validStartDate <= validEndDate) {
+          validDays[validStartDate++] = true
+        }
+      }
+    } else if (!this.options.startDate || !this.options.endDate) {
+      while (validStartDate < daysInMonth) {
+        validDays[validStartDate++] = true
+      }
+    }
+
 
     this.$calendar.find('.date-current-year,.date-current-month,tbody.date-days').empty()
     this.$calendar.find('.date-current-year').html(d.getFullYear())
@@ -134,7 +156,8 @@
       html.push('<td class="inactive">' + (++dateBegin) + '</td>')
     }
     while (monthStart < 7) {
-      html.push('<td>' + (++theDay) + '</td>')
+      validClass = validDays[++theDay] ? '' : ' class="invalid"'
+      html.push('<td' + validClass + '>' + (theDay) + '</td>')
       monthStart++
     }
     html.push('</tr>')
@@ -142,7 +165,8 @@
       html.push('<tr>')
       var j = 0
       while (j < 7) {
-        html.push('<td>' + (++theDay) + '</td>')
+        validClass = validDays[++theDay] ? '' : ' class="invalid"'
+        html.push('<td' + validClass + '>' + theDay + '</td>')
         j++
       }
       html.push('</tr>')
@@ -154,7 +178,8 @@
         , newDays = 0
       while (i < 7) {
         if (theDay < daysInMonth) {
-          html.push('<td>' + (++theDay) + '</td>')
+          validClass = validDays[++theDay] ? '' : ' class="invalid"'
+          html.push('<td' + validClass + '>' + theDay + '</td>')
         } else {
           html.push('<td class="inactive">' + (++newDays) + '</td>')
         }
