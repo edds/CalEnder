@@ -21,7 +21,7 @@
     "        <th>M</th>" +
     "        <th>T</th>" +
     "        <th>W</th>" +
-    "        <th>R</th>" +
+    "        <th>T</th>" +
     "        <th>F</th>" +
     "        <th>S</th>" +
     "      </tr>" +
@@ -51,7 +51,14 @@
 
   function Calendar (el, options) {
     var self = this
-    this.options = options || {}
+      , optionAttr = null
+    this.options = {
+        format: ['year', 'month', 'day']
+      , date: false
+    }
+    for(optionAttr in options){
+      this.options[optionAttr] = options[optionAttr]
+    }
     this.$input = $(el).first()
     this.$calendar = $(template).appendTo('body')
     this.$calendar.delegate('tbody td', 'mouseover', function () {
@@ -72,11 +79,17 @@
     })
     this.$calendar.delegate('tbody td:not(.inactive)', 'click.day', function (e) {
       var day = $(this).html()
-      self.$input.val([
-          getMonthNumberFromName(self.$calendar.find('.date-current-month').html())
-        , day
-        , self.$calendar.find('.date-current-year').html()].join('-')
-      )
+        , newDate = {
+              'year': self.$calendar.find('.date-current-year').html()
+            , 'month': getMonthNumberFromName(self.$calendar.find('.date-current-month').html())
+            , 'day': parseInt(day,10) < 9 ? '0' + day : day
+          }
+        , newVal = []
+        , i = 0
+      for(; i < 3; i++){
+        newVal.push(newDate[self.options.format[i]]);
+      }
+      self.$input.val(newVal.join('-'))
       self.$calendar.removeClass('active')
     })
 
