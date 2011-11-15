@@ -82,8 +82,8 @@
       var day = $(this).html()
         , newDate = {
               'year': self.$calendar.find('.date-current-year').html()
-            , 'month': getMonthNumberFromName(self.$calendar.find('.date-current-month').html())
-            , 'day': parseInt(day,10) < 9 ? '0' + day : day
+            , 'month': self.zeroPad(getMonthNumberFromName(self.$calendar.find('.date-current-month').html()))
+            , 'day': self.zeroPad(day)
           }
         , newVal = []
         , i = 0
@@ -104,14 +104,16 @@
 
     this.$calendar.delegate('.date-month-next', 'click', function (e) {
       var y = parseFloat(self.$calendar.find('.date-current-year').html())
-        , m = getMonthNumberFromName($('.date-current-month').html())
+        , m = getMonthNumberFromName(self.$calendar.find('.date-current-month').html())
       if ((m == 12)) ++y && (m = 0)
       self.setDate(months[m] + ' 1,' + y)
     })
 
     this.setDate((this.options.date || new Date()).toDateString())
   }
-
+  Calendar.prototype.zeroPad = function (date) {
+    return parseInt(date,10) < 10 ? '0' + date : date
+  }
   Calendar.prototype.setDate = function (date) {
     var d = new Date(date)
       , monthStartDate = new Date(d.getFullYear(), d.getMonth(), 1)
@@ -129,10 +131,10 @@
       , i = 0
       , monthEndDate = new Date(d.getFullYear(), d.getMonth(), daysInMonth)
       , inValidMonth = (this.options.startDate > monthStartDate && this.options.startDate < monthEndDate)
-                       || (this.options.endDate > monthEndDate && this.options.endDate < monthEndDate)
+                       || (this.options.endDate > monthStartDate && this.options.endDate < monthEndDate)
       , validDays = {}
       , validStartDate = this.options.startDate > monthStartDate ? this.options.startDate.getDate() : 1
-      , validEndDate = this.options.endDate > monthEndDate ? this.options.endDate.getDate() : daysInMonth
+      , validEndDate = this.options.endDate < monthEndDate ? this.options.endDate.getDate() : daysInMonth
       , validClass = ''
 
     if (this.options.startDate && this.options.endDate && inValidMonth ) {
@@ -222,6 +224,7 @@
           calendar.$calendar.removeClass('active')
         })
       })
+      return this;
     }
   }, true)
 }(ender);
