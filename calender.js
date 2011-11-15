@@ -91,6 +91,7 @@
         newVal.push(newDate[self.options.format[i]])
       }
       self.$input.val(newVal.join('-'))
+      self.$input.emit('change')
       self.$calendar.removeClass('active')
     })
 
@@ -199,6 +200,8 @@
 
   $.ender({
     calender: function (options) {
+      var $document = $(document)
+
       $(this).forEach(function (el) {
         var $el = $(el)
           , offset = $el.offset()
@@ -213,6 +216,9 @@
               calendar.$calendar.removeClass('active')
             }
           })
+        $document.bind('click', function (e) {
+          calendar.$calendar.removeClass('active')
+        })
       })
     }
   }, true)
