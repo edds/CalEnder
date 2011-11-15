@@ -139,6 +139,8 @@
       while (validStartDate < daysInMonth) {
         if (validStartDate <= validEndDate) {
           validDays[validStartDate++] = true
+        } else {
+          validStartDate++
         }
       }
     } else if (!this.options.startDate || !this.options.endDate) {
