@@ -220,9 +220,9 @@
               calendar.$calendar.removeClass('active')
             }
           })
-        $document.bind('click', function (e) {
-          calendar.$calendar.removeClass('active')
-        })
+          .bind('blur', function (e) {
+            calendar.$calendar.removeClass('active')
+          })
       })
       return this;
     }
